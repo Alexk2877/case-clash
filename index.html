@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Case Clash</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      background:
+        radial-gradient(circle at top left, #25204d, transparent 40%),
+        radial-gradient(circle at bottom right, #142c52, transparent 40%),
+        #090b16;
+      min-height: 100vh;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+      border-radius: 12px;
+      padding: 13px 18px;
+      transition: .2s;
+    }
+
+    button:active {
+      transform: scale(.96);
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1200px;
+      margin: auto;
+      padding: 16px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 16px;
+      border: 1px solid #292e4a;
+      border-radius: 20px;
+      background: rgba(15, 18, 35, .88);
+      backdrop-filter: blur(15px);
+    }
+
+    .logo {
+      font-size: 25px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #8b5cf6, #22d3ee);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .balance {
+      background: #191e35;
+      border: 1px solid #343b62;
+      padding: 11px 15px;
+      border-radius: 12px;
+      color: #facc15;
+      font-weight: 800;
+    }
+
+    .login-btn {
+      background: linear-gradient(135deg, #4285f4, #2563eb);
+    }
+
+    .logout-btn {
+      background: #252b43;
+      display: none;
+    }
+
+    .user-info {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      background: #191e35;
+      border-radius: 12px;
+      padding: 7px 11px;
+    }
+
+    .user-info img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+    }
+
+    nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 22px;
+      overflow-x: auto;
+    }
+
+    nav button {
+      background: #171c31;
+      border: 1px solid #2a3150;
+      white-space: nowrap;
+    }
+
+    nav button.active {
+      background: linear-gradient(135deg, #7c3aed, #2563eb);
+      border-color: transparent;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+      animation: appear .3s ease;
+    }
+
+    @keyframes appear {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero {
+      padding: 28px;
+      border-radius: 22px;
+      background:
+        linear-gradient(135deg, rgba(124, 58, 237, .25), rgba(14, 165, 233, .12)),
+        #12162a;
+      border: 1px solid #30365a;
+      margin-bottom: 22px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(28px, 6vw, 48px);
+    }
+
+    .hero p {
+      margin: 0;
+      color: #aeb7d8;
+      line-height: 1.5;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 20px 0 14px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 23px;
+    }
+
+    .muted {
+      color: #8993b8;
+    }
+
+    .cases-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .case-card {
+      position: relative;
+      overflow: hidden;
+      padding: 20px;
+      min-height: 260px;
+      border-radius: 20px;
+      border: 1px solid #303756;
+      background: linear-gradient(145deg, #171c32, #101426);
+      transition: .25s;
+    }
+
+    .case-card:hover {
+      transform: translateY(-5px);
+      border-color: #7354d9;
+      box-shadow: 0 12px 35px rgba(80, 60, 180, .2);
+    }
+
+    .case-card::before {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      right: -60px;
+      top: -60px;
+      border-radius: 50%;
+      background: var(--case-color);
+      opacity: .15;
+      filter: blur(25px);
+    }
+
+    .case-icon {
+      position: relative;
+      font-size: 58px;
+      margin-bottom: 12px;
+    }
+
+    .case-card h3 {
+      position: relative;
+      margin: 0 0 8px;
+      font-size: 21px;
+    }
+
+    .case-card p {
+      position: relative;
+      min-height: 42px;
+      color: #9ca7ca;
+      font-size: 14px;
+    }
+
+    .case-bottom {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .case-price {
+      color: #facc15;
+      font-weight: 900;
+    }
+
+    .open-btn {
+      background: linear-gradient(135deg, #8b5cf6, #2563eb);
+    }
+
+    .inventory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .item-card {
+      background: #151a2e;
+      border: 1px solid #303756;
+      border-radius: 16px;
+      padding: 14px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .item-image {
+      height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .item-image svg {
+      max-width: 100%;
+      max-height: 100%;
+      filter: drop-shadow(0 8px 10px rgba(0,0,0,.4));
+    }
+
+    .item-name {
+      font-size: 14px;
+      font-weight: 800;
+      min-height: 34px;
+    }
+
+    .item-rarity {
+      font-size: 12px;
+      margin: 6px 0;
+      font-weight: 700;
+    }
+
+    .item-price {
+      color: #facc15;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .sell-btn {
+      width: 100%;
+      background: #27304d;
+      font-size: 13px;
+      padding: 10px;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 45px 20px;
+      border: 1px dashed #343c60;
+      border-radius: 18px;
+      color: #8e99bd;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .stat {
+      padding: 18px;
+      background: #151a2e;
+      border: 1px solid #2e3655;
+      border-radius: 16px;
+    }
+
+    .stat-value {
+      font-size: 26px;
+      font-weight: 900;
+      margin-top: 6px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(0, 0, 0, .75);
+      z-index: 100;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 560px;
+      padding: 24px;
+      border-radius: 22px;
+      border: 1px solid #3c4670;
+      background: #11162a;
+      text-align: center;
+      animation: modalIn .3s ease;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: scale(.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .modal-box h2 {
+      margin-top: 0;
+    }
+
+    .roulette {
+      height: 170px;
+      overflow: hidden;
+      position: relative;
+      border-radius: 16px;
+      border: 1px solid #343d63;
+      background: #0b0f1e;
+      margin: 18px 0;
+    }
+
+    .roulette-track {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      gap: 12px;
+      padding: 0 12px;
+      transform: translateX(0);
+    }
+
+    .roulette-item {
+      min-width: 125px;
+      height: 135px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #171d33;
+      border: 2px solid #394365;
+      border-radius: 14px;
+      flex-shrink: 0;
+    }
+
+    .roulette-item svg {
+      width: 85px;
+      height: 75px;
+    }
+
+    .roulette-item span {
+      font-size: 11px;
+      margin-top: 6px;
+      font-weight: 700;
+    }
+
+    .roulette-marker {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 3px;
+      height: 100%;
+      background: #facc15;
+      transform: translateX(-50%);
+      z-index: 2;
+      box-shadow: 0 0 15px #facc15;
+    }
+
+    .result {
+      display: none;
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    .result svg {
+      width: 180px;
+      height: 150px;
+    }
+
+    .result-name {
+      font-size: 24px;
+      font-weight: 900;
+      margin: 10px 0;
+    }
+
+    .result-rarity {
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .close-btn {
+      background: #2a3352;
+      margin-top: 12px;
+    }
+
+    .notice {
+      padding: 14px;
+      border-radius: 12px;
+      background: #18213a;
+      border: 1px solid #34456d;
+      color: #aebce2;
+      line-height: 1.5;
+      margin-top: 18px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 850px) {
+      .cases-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .inventory-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 580px) {
+      .app {
+        padding: 10px;
+      }
+
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .header-right {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .cases-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .inventory-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding: 22px;
+      }
+
+      .logo {
+        font-size: 23px;
+      }
+
+      .user-info {
+        max-width: 170px;
+      }
+
+      .user-info span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <header>
+      <div class="logo">CASE CLASH</div>
+
+      <div class="header-right">
+        <div class="balance">
+          💰 <span id="balance">1000</span>
+        </div>
+
+        <div class="user-info" id="userInfo">
+          <img id="userAvatar" src="" alt="avatar">
+          <span id="userName"></span>
+        </div>
+
+        <button class="login-btn" id="loginBtn" onclick="loginWithGoogle()">
+          Войти через Google
+        </button>
+
+        <button class="logout-btn" id="logoutBtn" onclick="logout()">
+          Выйти
+        </button>
+      </div>
+    </header>
+
+    <nav>
+      <button class="active" onclick="showPage('home', this)">🏠 Главная</button>
+      <button onclick="showPage('cases', this)">📦 Кейсы</button>
+      <button onclick="showPage('inventory', this)">🎒 Инвентарь</button>
+    </nav>
+
+    <main>
+      <section class="page active" id="home">
+        <div class="hero">
+          <h1>Открывай. Получай. Побеждай.</h1>
+          <p>
+            Открывай кейсы, собирай редкие предметы и создавай свою коллекцию
+            в Case Clash.
+          </p>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="muted">Баланс</div>
+            <div class="stat-value">💰 <span id="homeBalance">1000</span></div>
+          </div>
+
+          <div class="stat">
+            <div class="muted">Предметов</div>
+            <div class="stat-value" id="itemCount">0</div>
+          </div>
+
+          <div class="stat">
+            <div class="muted">Открыто кейсов</div>
+            <div class="stat-value" id="openedCount">0</div>
+          </div>
+        </div>
+
+        <div class="section-title">
+          <h2>Популярные кейсы</h2>
+          <span class="muted">Выбери свой</span>
+        </div>
+
+        <div class="cases-grid" id="homeCases"></div>
+      </section>
+
+      <section class="page" id="cases">
+        <div class="section-title">
+          <h2>Все кейсы</h2>
+          <span class="muted">Открывай за монеты</span>
+        </div>
+
+        <div class="cases-grid" id="allCases"></div>
+      </section>
+
+      <section class="page" id="inventory">
+        <div class="section-title">
+          <h2>Твой инвентарь</h2>
+          <span class="muted">Предметы сохраняются на устройстве</span>
+        </div>
+
+        <div id="inventoryContent"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal" id="caseModal">
+    <div class="modal-box">
+      <h2 id="modalTitle">Открытие кейса</h2>
+
+      <div class="roulette" id="roulette">
+        <div class="roulette-marker"></div>
+        <div class="roulette-track" id="rouletteTrack"></div>
+      </div>
+
+      <div class="result" id="result">
+        <div id="resultImage"></div>
+        <div class="result-name" id="resultName"></div>
+        <div class="result-rarity" id="resultRarity"></div>
+        <div class="item-price" id="resultPrice"></div>
+      </div>
+
+      <button class="close-btn" onclick="closeModal()">Закрыть</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signOut,
+      onAuthStateChanged
+    } from
+      "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAmKKYbWtnhr65UlZqnIgc-zEE20vKfop0",
+      authDomain: "case-clash-web.firebaseapp.com",
+      projectId: "case-clash-web",
+      storageBucket: "case-clash-web.firebasestorage.app",
+      messagingSenderId: "330847648871",
+      appId: "1:330847648871:web:52573f172c086d9a55a8c2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    window.loginWithGoogle = async function () {
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (error) {
+        console.error(error);
+        alert("Ошибка входа: " + error.message);
+      }
+    };
+
+    window.logout = async function () {
+      try {
+        await signOut(auth);
+      } catch (error) {
+        alert("Ошибка выхода: " + error.message);
+      }
+    };
+
+    onAuthStateChanged(auth, user => {
+      const loginBtn = document.getElementById("loginBtn");
+      const logoutBtn = document.getElementById("logoutBtn");
+      const userInfo = document.getElementById("userInfo");
+
+      if (user) {
+        loginBtn.style.display = "none";
+        logoutBtn.style.display = "block";
+        userInfo.style.display = "flex";
+
+        document.getElementById("userName").textContent =
+          user.displayName || user.email || "Игрок";
+
+        document.getElementById("userAvatar").src =
+          user.photoURL || "https://www.gravatar.com/avatar/?d=mp";
+      } else {
+        loginBtn.style.display = "block";
+        logoutBtn.style.display = "none";
+        userInfo.style.display = "none";
+      }
+    });
+  </script>
+
+  <script>
+    const cases = [
+      {
+        id: "starter",
+        name: "Starter Case",
+        icon: "📦",
+        description: "Простой кейс для начала коллекции",
+        price: 100,
+        color: "#22d3ee",
+        drops: [
+          { name: "Blue Strike", rarity: "Обычный", price: 35, color: "#38bdf8", chance: 45 },
+          { name: "Night Edge", rarity: "Обычный", price: 50, color: "#64748b", chance: 30 },
+          { name: "Purple Wave", rarity: "Редкий", price: 130, color: "#a855f7", chance: 18 },
+          { name: "Crimson Fang", rarity: "Эпический", price: 280, color: "#ef4444", chance: 6 },
+          { name: "Golden Beast", rarity: "Легендарный", price: 800, color: "#facc15", chance: 1 }
+        ]
+      },
+      {
+        id: "premium",
+        name: "Premium Case",
+        icon: "💎",
+        description: "Больше редких и дорогих предметов",
+        price: 250,
+        color: "#a855f7",
+        drops: [
+          { name: "Ocean Hunter", rarity: "Обычный", price: 80, color: "#0ea5e9", chance: 35 },
+          { name: "Violet Phantom", rarity: "Редкий", price: 220, color: "#8b5cf6", chance: 30 },
+          { name: "Red Viper", rarity: "Редкий", price: 350, color: "#ef4444", chance: 20 },
+          { name: "Royal Dragon", rarity: "Эпический", price: 750, color: "#f97316", chance: 12 },
+          { name: "Galaxy King", rarity: "Легендарный", price: 2000, color: "#facc15", chance: 3 }
+        ]
+      },
+      {
+        id: "legendary",
+        name: "Legendary Case",
+        icon: "👑",
+        description: "Только для охотников за легендами",
+        price: 600,
+        color: "#facc15",
+        drops: [
+          { name: "Silver Ghost", rarity: "Редкий", price: 180, color: "#94a3b8", chance: 30 },
+          { name: "Inferno", rarity: "Эпический", price: 500, color: "#f97316", chance: 30 },
+          { name: "Emerald Strike", rarity: "Эпический", price: 850, color: "#10b981", chance: 22 },
+          { name: "Cyber Samurai", rarity: "Легендарный", price: 1800, color: "#ec4899", chance: 15 },
+          { name: "Golden Emperor", rarity: "Мифический", price: 5000, color: "#facc15", chance: 3 }
+        ]
+      }
+    ];
+
+    let balance = Number(localStorage.getItem("caseClashBalance")) || 1000;
+    let inventory = JSON.parse(localStorage.getItem("caseClashInventory") || "[]");
+    let opened = Number(localStorage.getItem("caseClashOpened")) || 0;
+
+    let currentCase = null;
+    let isOpening = false;
+
+    function saveGame() {
+      localStorage.setItem("caseClashBalance", balance);
+      localStorage.setItem("caseClashInventory", JSON.stringify(inventory));
+      localStorage.setItem("caseClashOpened", opened);
+    }
+
+    function updateStats() {
+      document.getElementById("balance").textContent = balance;
+      document.getElementById("homeBalance").textContent = balance;
+      document.getElementById("itemCount").textContent = inventory.length;
+      document.getElementById("openedCount").textContent = opened;
+    }
+
+    function createWeaponSVG(item) {
+      return `
+        <svg viewBox="0 0 240 140" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g${Math.random()}" x1="0" x2="1">
+              <stop offset="0%" stop-color="${item.color}"/>
+              <stop offset="100%" stop-color="#111827"/>
+            </linearGradient>
+          </defs>
+          <path
+            d="M35 82 L75 65 L150 65 L205 45 L220 55 L175 82 L105 95 L65 105 Z"
+            fill="${item.color}"
+            stroke="#e5e7eb"
+            stroke-width="2"
+          />
+          <path
+            d="M78 91 L115 91 L105 122 L72 122 Z"
+            fill="#20283f"
+            stroke="#64748b"
+            stroke-width="2"
+          />
+          <path
+            d="M145 65 L190 40 L205 45 L165 75 Z"
+            fill="#e5e7eb"
+            opacity=".7"
+          />
+          <circle cx="65" cy="91" r="7" fill="#facc15"/>
+          <circle cx="184" cy="58" r="4" fill="#fff"/>
+        </svg>
+      `;
+    }
+
+    function rarityColor(rarity) {
+      if (rarity === "Обычный") return "#94a3b8";
+      if (rarity === "Редкий") return "#38bdf8";
+      if (rarity === "Эпический") return "#c084fc";
+      if (rarity === "Легендарный") return "#facc15";
+      if (rarity === "Мифический") return "#fb7185";
+      return "#fff";
+    }
+
+    function caseHTML(caseData) {
+      return `
+        <div class="case-card" style="--case-color:${caseData.color}">
+          <div class="case-icon">${caseData.icon}</div>
+          <h3>${caseData.name}</h3>
+          <p>${caseData.description}</p>
+
+          <div class="case-bottom">
+            <span class="case-price">💰 ${caseData.price}</span>
+            <button class="open-btn" onclick="openCase('${caseData.id}')">
+              Открыть
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCases() {
+      document.getElementById("homeCases").innerHTML =
+        cases.slice(0, 3).map(caseHTML).join("");
+
+      document.getElementById("allCases").innerHTML =
+        cases.map(caseHTML).join("");
+    }
+
+    function renderInventory() {
+      const container = document.getElementById("inventoryContent");
+
+      if (inventory.length === 0) {
+        container.innerHTML = `
+          <div class="empty">
+            <div style="font-size:50px">🎒</div>
+            <h3>Инвентарь пуст</h3>
+            <p>Открой первый кейс и получи свой предмет.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="inventory-grid">
+          ${inventory.map((item, index) => `
+            <div class="item-card">
+              <div class="item-image">
+                ${createWeaponSVG(item)}
+              </div>
+
+              <div class="item-name">${item.name}</div>
+
+              <div
+                class="item-rarity"
+                style="color:${rarityColor(item.rarity)}"
+              >
+                ${item.rarity}
+              </div>
+
+              <div class="item-price">💰 ${item.price}</div>
+
+              <button class="sell-btn" onclick="sellItem(${index})">
+                Продать
+              </button>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function weightedDrop(drops) {
+      const total = drops.reduce((sum, item) => sum + item.chance, 0);
+      let random = Math.random() * total;
+
+      for (const item of drops) {
+        random -= item.chance;
+        if (random <= 0) return item;
+      }
+
+      return drops[drops.length - 1];
+    }
+
+    function createRoulette(caseData, result) {
+      const track = document.getElementById("rouletteTrack");
+      const list = [];
+
+      for (let i = 0; i < 24; i++) {
+        const item = i === 20 ? result : weightedDrop(caseData.drops);
+        list.push(item);
+      }
+
+      track.innerHTML = list.map(item => `
+        <div class="roulette-item" style="border-color:${item.color}">
+          ${createWeaponSVG(item)}
+          <span style="color:${rarityColor(item.rarity)}">${item.name}</span>
+        </div>
+      `).join("");
+
+      track.style.transition = "none";
+      track.style.transform = "translateX(0)";
+    }
+
+    window.openCase = function (caseId) {
+      if (isOpening) return;
+
+      currentCase = cases.find(item => item.id === caseId);
+      if (!currentCase) return;
+
+      if (balance < currentCase.price) {
+        alert("Недостаточно монет!");
+        return;
+      }
+
+      balance -= currentCase.price;
+      opened++;
+      updateStats();
+      saveGame();
+
+      const result = weightedDrop(currentCase.drops);
+      const modal = document.getElementById("caseModal");
+      const roulette = document.getElementById("roulette");
+      const resultBox = document.getElementById("result");
+
+      document.getElementById("modalTitle").textContent =
+        "Открытие " + currentCase.name;
+
+      roulette.style.display = "block";
+      resultBox.classList.remove("show");
+      modal.classList.add("show");
+      isOpening = true;
+
+      createRoulette(currentCase, result);
+
+      setTimeout(() => {
+        const track = document.getElementById("rouletteTrack");
+        track.style.transition =
+          "transform 4s cubic-bezier(.12,.8,.18,1)";
+
+        track.style.transform = "translateX(-2500px)";
+      }, 100);
+
+      setTimeout(() => {
+        inventory.unshift({
+          ...result,
+          obtainedAt: Date.now()
+        });
+
+        document.getElementById("resultImage").innerHTML =
+          createWeaponSVG(result);
+
+        document.getElementById("resultName").textContent = result.name;
+
+        document.getElementById("resultRarity").textContent =
+          result.rarity;
+
+        document.getElementById("resultRarity").style.color =
+          rarityColor(result.rarity);
+
+        document.getElementById("resultPrice").textContent =
+          "Стоимость: 💰 " + result.price;
+
+        roulette.style.display = "none";
+        resultBox.classList.add("show");
+
+        updateStats();
+        renderInventory();
+        saveGame();
+
+        isOpening = false;
+      }, 4400);
+    };
+
+    window.sellItem = function (index) {
+      const item = inventory[index];
+      if (!item) return;
+
+      balance += item.price;
+      inventory.splice(index, 1);
+
+      updateStats();
+      renderInventory();
+      saveGame();
+    };
+
+    window.closeModal = function () {
+      if (isOpening) return;
+
+      document.getElementById("caseModal").classList.remove("show");
+      document.getElementById("result").classList.remove("show");
+      document.getElementById("roulette").style.display = "block";
+    };
+
+    window.showPage = function (pageId, button) {
+      document.querySelectorAll(".page").forEach(page => {
+        page.classList.remove("active");
+      });
+
+      document.querySelectorAll("nav button").forEach(btn => {
+        btn.classList.remove("active");
+      });
+
+      document.getElementById(pageId).classList.add("active");
+      button.classList.add("active");
+
+      if (pageId === "inventory") {
+        renderInventory();
+      }
+    };
+
+    document.getElementById("caseModal").addEventListener("click", event => {
+      if (event.target.id === "caseModal" && !isOpening) {
+        closeModal();
+      }
+    });
+
+    renderCases();
+    renderInventory();
+    updateStats();
+  </script>
+</body>
+</html>
