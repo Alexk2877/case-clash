@@ -2205,9 +2205,19 @@ init();
     getAuth,
     GoogleAuthProvider,
     signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     signOut,
     onAuthStateChanged
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    limit
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAmKKYbWtnhr65UlZqnIgc-zEE20vKfop0",
@@ -2220,7 +2230,51 @@ init();
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
+  const db = getFirestore(app);
   const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+
+  function authErrorText(error) {
+    const code = error?.code || "unknown";
+    if (code.includes("unauthorized-domain")) {
+      return "Домен сайта не добавлен в Firebase → Authentication → Settings → Authorized domains.";
+    }
+    if (code.includes("popup-blocked")) {
+      return "Браузер заблокировал окно Google. Использую вход через перенаправление.";
+    }
+    if (code.includes("popup-closed-by-user")) return "Окно Google было закрыто.";
+    if (code.includes("operation-not-allowed")) return "Google-вход не включён в Firebase Authentication.";
+    return `Ошибка Google-входа: ${code}`;
+  }
+
+  async function loginGoogle() {
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      console.error("Google login error:", error);
+      const code = error?.code || "";
+      if (code.includes("popup-blocked") || code.includes("operation-not-supported-in-this-environment")) {
+        try {
+          await signInWithRedirect(auth, provider);
+          return;
+        } catch (redirectError) {
+          console.error("Google redirect error:", redirectError);
+          showToast(authErrorText(redirectError), "error");
+          return;
+        }
+      }
+      showToast(authErrorText(error), "error");
+    }
+  }
+
+  async function finishRedirectLogin() {
+    try {
+      await getRedirectResult(auth);
+    } catch (error) {
+      console.error("Google redirect result error:", error);
+      showToast(authErrorText(error), "error");
+    }
+  }
 
   function createAuthPanel() {
     const headerRight = document.querySelector(".header-right");
@@ -2229,23 +2283,8 @@ init();
     const panel = document.createElement("div");
     panel.id = "firebaseAuthPanel";
     panel.className = "firebase-auth-panel";
-    panel.innerHTML = `
-      <button id="googleLoginButton" class="firebase-auth-button">
-        Войти через Google
-      </button>
-    `;
     headerRight.appendChild(panel);
-
-    document.getElementById("googleLoginButton").addEventListener("click", async () => {
-      try {
-        await signInWithPopup(auth, provider);
-      } catch (error) {
-        console.error(error);
-        if (typeof showToast === "function") {
-          showToast("Не удалось войти через Google", "error");
-        }
-      }
-    });
+    renderAuthState(auth.currentUser);
   }
 
   function renderAuthState(user) {
@@ -2254,36 +2293,58 @@ init();
 
     if (!user) {
       panel.innerHTML = `<button id="googleLoginButton" class="firebase-auth-button">Войти через Google</button>`;
-      document.getElementById("googleLoginButton").addEventListener("click", async () => {
-        try {
-          await signInWithPopup(auth, provider);
-        } catch (error) {
-          console.error(error);
-          if (typeof showToast === "function") showToast("Не удалось войти через Google", "error");
-        }
-      });
+      document.getElementById("googleLoginButton").addEventListener("click", loginGoogle);
       return;
     }
 
     const photo = user.photoURL ? `<img src="${user.photoURL}" alt="Аватар">` : "";
     panel.innerHTML = `
-      <div class="firebase-user">
-        ${photo}
-        <span>${user.displayName || user.email || "Игрок"}</span>
-      </div>
+      <div class="firebase-user">${photo}<span>${escapeHTML(user.displayName || user.email || "Игрок")}</span></div>
       <button id="googleLogoutButton" class="firebase-logout">Выйти</button>
     `;
-
     document.getElementById("googleLogoutButton").addEventListener("click", async () => {
-      await signOut(auth);
+      try { await signOut(auth); }
+      catch (error) { showToast("Не удалось выйти из аккаунта", "error"); }
     });
+  }
 
-    if (typeof showToast === "function") showToast(`Вход выполнен: ${user.displayName || "Игрок"}`, "success");
+  async function loadOnlineMarket() {
+    const list = document.querySelector(".market-list");
+    if (!list) return;
+
+    try {
+      const marketQuery = query(collection(db, "market"), orderBy("createdAt", "desc"), limit(20));
+      const snapshot = await getDocs(marketQuery);
+
+      if (snapshot.empty) {
+        list.innerHTML = `
+          <div class="market-row"><span>Рынок пока пуст</span><strong>—</strong></div>
+          <div class="market-row"><span>Добавь первую выставленную вещь</span><strong>ONLINE</strong></div>
+        `;
+        return;
+      }
+
+      list.innerHTML = snapshot.docs.map(doc => {
+        const data = doc.data();
+        const name = escapeHTML(data.name || "Неизвестный предмет");
+        const price = Number(data.price || 0);
+        return `<div class="market-row"><span>${name}</span><strong>${formatNumber(price)} ${CURRENCY}</strong></div>`;
+      }).join("");
+    } catch (error) {
+      console.error("Market load error:", error);
+      list.innerHTML = `
+        <div class="market-row"><span>Онлайн-рынок ещё не настроен</span><strong>SETUP</strong></div>
+        <div class="market-row"><span>Нужно создать Firestore Database</span><strong>Firebase</strong></div>
+      `;
+    }
   }
 
   window.caseClashAuth = auth;
+  window.caseClashDB = db;
   createAuthPanel();
   onAuthStateChanged(auth, renderAuthState);
+  finishRedirectLogin();
+  loadOnlineMarket();
 </script>
 
 </body>
